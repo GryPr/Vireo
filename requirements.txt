@@ -1,2 +1,4 @@
 disnake
 sqlalchemy
+mariadb
+sqlalchemy-utils
