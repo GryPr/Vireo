@@ -1,13 +1,5 @@
 import asyncio
 import os
-import sys
-import traceback
-
-import disnake
-from disnake.ext import commands
-
-import json
-import os
 import platform
 import random
 import sys
@@ -61,8 +53,12 @@ intents.presences = True
 
 intents = disnake.Intents.default()
 
-bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"), intents=intents)
-await Transmission.transmission_service.initialize(bot)
+bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"),
+          intents=disnake.Intents.all(),
+          help_command=None,  # type: ignore
+          sync_commands_debug=True,
+          sync_permissions=True,
+          test_guilds=[956366437532971068, 927670915423158322])
 
 
 @bot.event
@@ -70,6 +66,7 @@ async def on_ready() -> None:
     """
     The code in this even is executed when the bot is ready
     """
+    await Transmission.transmission_service.initialize(bot)
     print(f"Logged in as {bot.user.name}")
     print(f"disnake API version: {disnake.__version__}")
     print(f"Python version: {platform.python_version()}")
@@ -193,6 +190,11 @@ async def on_command_error(context: Context, error) -> None:
         )
         await context.send(embed=embed)
     raise error
+
+
+@bot.slash_command()
+async def hello2(inter: disnake.CommandInteraction):
+    await inter.response.send_message("Hello world!")
 
 
 # Run the bot with the token

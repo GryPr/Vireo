@@ -8,7 +8,7 @@ from services.portal.chain import Chain
 
 
 def load_channels(bot) -> Dict[int, int]:
-    channels = Channel.query.all()
+    channels = driver_service.session.query(Channel)
     channels_dict = {}
     for channel in channels:
         channels_dict[channel.channel_id] = channel.portal_id
@@ -16,8 +16,8 @@ def load_channels(bot) -> Dict[int, int]:
 
 
 async def load_portals(bot) -> Dict[int, Chain]:
-    portals = Portal.query.all()
-    channels = Channel.query.all()
+    portals = driver_service.session.query(Portal)
+    channels = driver_service.session.query(Channel)
     portals_dict = {}
     channels_dict: Dict[int, List[disnake.TextChannel]] = {}
     for channel in channels:
@@ -26,7 +26,7 @@ async def load_portals(bot) -> Dict[int, Chain]:
         channels_dict[channel.portal_id].append(bot.get_channel(channel))
     for portal in portals:
         if not portals_dict[portal.portal_id]:
-            portals_dict[portal.portal_id] = await Chain.new(channels[portal.portal_id])
+            portals_dict[portal.portal_id] = await Chain.new(channels_dict[portal.portal_id])
     return portals_dict
 
 

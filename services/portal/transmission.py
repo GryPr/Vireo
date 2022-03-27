@@ -28,7 +28,9 @@ class Transmission:
         return portal_id
 
     def handle_message(self, message: disnake.Message):
-        portal_id: int = self.channels[message.channel.id]
+        portal_id: int = self.channels.get(message.channel.id)
+        if not portal_id:
+            return
         chain: Chain = self.portals[portal_id]
         chain.send(message)
 
