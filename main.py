@@ -101,6 +101,14 @@ async def on_message(message: disnake.Message) -> None:
 
 
 @bot.event
+async def on_message_delete(message: disnake.Message) -> None:
+    if message.author == bot.user or message.author.bot:
+        return
+    if not Transmission.transmission_service.channel_in_portal(message.channel.id):
+        return
+
+
+@bot.event
 async def on_slash_command(interaction: ApplicationCommandInteraction) -> None:
     """
     The code in this event is executed every time a slash command has been *successfully* executed

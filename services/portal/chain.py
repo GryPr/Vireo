@@ -24,9 +24,12 @@ class Chain:
         """
         If the message is sent to a link/channel in the chain, it will be sent to all the links in the chain.
         """
+
+        # If the message is a reply, grab the original message ID
         original_message_id = None
         if not message.reference is None:
             original_message_id = await retrieve_original_message(message.reference.message_id)
+
         await add_message(message.id, message.id, message.channel.id)
         if message.channel in (link.channel for link in self.links):
             for link in self.links:

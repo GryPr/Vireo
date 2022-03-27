@@ -32,10 +32,16 @@ class Link:
         """
         if msg.channel == self.channel:
             return
-        if not original_message_id is None:
-            message_to_reply_id = await retrieve_message_to_reply(original_message_id, self.hook.channel.id)
-            message_to_reply = await self.channel.fetch_message(int(message_to_reply_id))
-            await message_to_reply.reply(content=f"{msg.author.name}'s message below is replying to this message.")
+
+        # Handle if this message is replying to another message
+        try:
+            if not original_message_id is None:
+                message_to_reply_id = await retrieve_message_to_reply(original_message_id, self.hook.channel.id)
+                message_to_reply = await self.channel.fetch_message(int(message_to_reply_id))
+                await message_to_reply.reply(content=f"{msg.author.name}'s message below is replying to this message.")
+        except:
+            print("Couldn't find the message to reply to")
+
         files = [await attc.to_file() for attc in msg.attachments]
         webhook_message: WebhookMessage = await self.hook.send(content=msg.content,
                                                                avatar_url=str(msg.author.avatar.url),
