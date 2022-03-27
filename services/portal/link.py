@@ -28,5 +28,6 @@ class Link:
         if msg.channel == self.channel:
             return
         files = [await attc.to_file() for attc in msg.attachments]
-        await self.hook.send(content=msg.content, avatar_url=str(msg.author.avatar_url),
+
+        await self.hook.send(content=msg.content, avatar_url=str(msg.author.avatar.url),
                              username=msg.author.name, tts=msg.tts, files=files)

@@ -27,12 +27,12 @@ class Transmission:
         await services.database.portal.add_portal(portal_id, primary_channel.id)
         return portal_id
 
-    def handle_message(self, message: disnake.Message):
+    async def handle_message(self, message: disnake.Message):
         portal_id: int = self.channels.get(message.channel.id)
         if not portal_id:
             return
         chain: Chain = self.portals[portal_id]
-        chain.send(message)
+        await chain.send(message)
 
     def check_portal_id_exists(self, portal_id: int) -> bool:
         if not self.portals[portal_id]:

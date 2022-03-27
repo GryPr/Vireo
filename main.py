@@ -96,7 +96,7 @@ async def on_message(message: disnake.Message) -> None:
     """
     if message.author == bot.user or message.author.bot:
         return
-    Transmission.transmission_service.handle_message(message)
+    await Transmission.transmission_service.handle_message(message)
     await bot.process_commands(message)
 
 

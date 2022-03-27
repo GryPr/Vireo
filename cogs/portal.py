@@ -3,7 +3,7 @@ from disnake.ext import commands
 from disnake.ext.commands import Bot
 
 from services.portal.transmission import transmission_service
-from utilities.embed import wip_embed
+from utilities.embed import wip_embed, error_embed
 
 
 class Portal(commands.Cog, name="portal"):
@@ -28,8 +28,20 @@ class Portal(commands.Cog, name="portal"):
         await inter.send(embed=embed)
 
     @portal.sub_command(description="Subscribe the channel to a portal")
-    async def sub(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.send(embed=wip_embed())
+    async def sub(self, inter: disnake.ApplicationCommandInteraction, portal_id: int):
+        # try:
+        await transmission_service.add_channel_to_portal(inter.channel, portal_id)
+        # except Exception as e:
+        #     print(e)
+        #     await inter.send(embed=error_embed("Error has occured adding the channel to the portal"))
+        #     return
+        embed = disnake.Embed(title="Added channel to the portal", description=f"Portal ID: {portal_id}")
+        embed.add_field(
+            name="Subscribe other servers using this command",
+            value=f"/portal sub {portal_id}",
+            inline=False
+        )
+        await inter.send(embed=embed)
 
     @portal.sub_command(description="Wipe all portals")
     async def wipe(self, inter: disnake.ApplicationCommandInteraction):
