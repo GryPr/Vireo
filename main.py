@@ -192,11 +192,6 @@ async def on_command_error(context: Context, error) -> None:
     raise error
 
 
-@bot.slash_command()
-async def hello2(inter: disnake.CommandInteraction):
-    await inter.response.send_message("Hello world!")
-
-
 # Run the bot with the token
 load_all_extensions()
 bot.run(os.environ.get("BOT_TOKEN"))

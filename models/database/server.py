@@ -8,8 +8,8 @@ Base = declarative_base()
 
 class Server(Base):
     __tablename__ = 'servers'
-    server_id = sqlalchemy.Column(sqlalchemy.String(255), primary_key=True)
-    portal_count = sqlalchemy.Column(sqlalchemy.Integer)
+    server_id = sqlalchemy.Column(sqlalchemy.String(20), primary_key=True)
+    portal_count = sqlalchemy.Column(sqlalchemy.String(20))
 
 
 Base.metadata.create_all(get_engine())

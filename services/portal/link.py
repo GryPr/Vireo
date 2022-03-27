@@ -1,4 +1,9 @@
+from typing import Optional
+
 import disnake
+from disnake import WebhookMessage
+
+from services.database.message_db import add_message, retrieve_message_to_reply
 from services.portal.webhook import Webhook
 
 
@@ -19,7 +24,7 @@ class Link:
         self.hook = await Webhook.connect(channel, "Vireo")
         return self
 
-    async def send(self, msg: disnake.Message):
+    async def send(self, msg: disnake.Message, original_message_id: int = None):
         """
         Send a message to the channel.
         If a discord message is passed, the bot will try to imitate the message and author using a webhook.
@@ -27,7 +32,14 @@ class Link:
         """
         if msg.channel == self.channel:
             return
+        if not original_message_id is None:
+            message_to_reply_id = await retrieve_message_to_reply(original_message_id, self.hook.channel.id)
+            message_to_reply = await self.channel.fetch_message(int(message_to_reply_id))
+            await message_to_reply.reply(content=f"{msg.author.name}'s message below is replying to this message.")
         files = [await attc.to_file() for attc in msg.attachments]
-
-        await self.hook.send(content=msg.content, avatar_url=str(msg.author.avatar.url),
-                             username=msg.author.name, tts=msg.tts, files=files)
+        webhook_message: WebhookMessage = await self.hook.send(content=msg.content,
+                                                               avatar_url=str(msg.author.avatar.url),
+                                                               username=msg.author.name, tts=msg.tts,
+                                                               files=files, wait=True)
+        await add_message(original_message_id=msg.id, copy_message_id=webhook_message.id,
+                          channel_id=webhook_message.channel.id)

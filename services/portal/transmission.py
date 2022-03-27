@@ -3,6 +3,7 @@ from typing import Dict
 
 import services.database.portal_db
 import utilities.random
+from services.database.message_db import add_message
 from services.database.portal_db import load_channels, load_portals, add_portal, add_channel
 from services.portal.chain import Chain
 from services.portal.link import Link

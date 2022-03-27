@@ -6,10 +6,11 @@ from services.database.driver import get_engine
 Base = declarative_base()
 
 
-class Portal(Base):
+class PortalMembers(Base):
     __tablename__ = 'portals'
     portal_id = sqlalchemy.Column(sqlalchemy.String(20), primary_key=True)
-    primary_channel_id = sqlalchemy.Column(sqlalchemy.String(20))
+    user_id = sqlalchemy.Column(sqlalchemy.String(20))
+    role_id = sqlalchemy.Column(sqlalchemy.String(20))
 
 
 Base.metadata.create_all(get_engine())
