@@ -28,7 +28,10 @@ class Chain:
         # If the message is a reply, grab the original message ID
         original_message_id = None
         if not message.reference is None:
-            original_message_id = await retrieve_original_message(message.reference.message_id)
+            try:
+                original_message_id = await retrieve_original_message(message.reference.message_id)
+            except:
+                print("Couldn't find the message to reply to")
 
         await add_message(message.id, message.id, message.channel.id)
         if message.channel in (link.channel for link in self.links):
