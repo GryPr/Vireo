@@ -66,13 +66,13 @@ async def on_ready() -> None:
     """
     The code in this even is executed when the bot is ready
     """
-    await Transmission.transmission_service.initialize(bot)
     print(f"Logged in as {bot.user.name}")
     print(f"disnake API version: {disnake.__version__}")
     print(f"Python version: {platform.python_version()}")
     print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
     print("-------------------")
     status_task.start()
+    await Transmission.transmission_service.initialize(bot)
 
 
 @tasks.loop(minutes=1.0)

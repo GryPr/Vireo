@@ -11,7 +11,7 @@ def load_channels(bot) -> Dict[int, int]:
     channels = driver_service.session.query(Channel)
     channels_dict = {}
     for channel in channels:
-        channels_dict[channel.channel_id] = channel.portal_id
+        channels_dict[int(channel.channel_id)] = int(channel.portal_id)
     return channels_dict
 
 
@@ -21,19 +21,21 @@ async def load_portals(bot) -> Dict[int, Chain]:
     portals_dict = {}
     channels_dict: Dict[int, List[disnake.TextChannel]] = {}
     for channel in channels:
-        if not channels_dict[channel.portal_id]:
-            channels_dict[channel.portal_id] = []
-        channels_dict[channel.portal_id].append(bot.get_channel(channel))
+        if not channels_dict.get(int(channel.portal_id)):
+            channels_dict[int(channel.portal_id)] = []
+        channels_dict[int(channel.portal_id)].append(bot.get_channel(int(channel.channel_id)))
     for portal in portals:
-        if not portals_dict[portal.portal_id]:
-            portals_dict[portal.portal_id] = await Chain.new(channels_dict[portal.portal_id])
+        if not portals_dict.get(int(portal.portal_id)):
+            portals_dict[int(portal.portal_id)] = await Chain.new(channels_dict[int(portal.portal_id)])
     return portals_dict
 
 
 async def add_portal(portal_id: int, channel_id: int):
     driver_service.session.add(Portal(portal_id=portal_id, primary_channel_id=channel_id))
+    driver_service.session.commit()
     await add_channel(portal_id, channel_id)
 
 
 async def add_channel(portal_id: int, channel_id: int):
     driver_service.session.add(Channel(portal_id=portal_id, channel_id=channel_id))
+    driver_service.session.commit()

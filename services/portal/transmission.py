@@ -1,9 +1,9 @@
 import disnake
 from typing import Dict
 
-import services.database.portal
+import services.database.portal_db
 import utilities.random
-from services.database.portal import load_channels, load_portals
+from services.database.portal_db import load_channels, load_portals, add_portal, add_channel
 from services.portal.chain import Chain
 from services.portal.link import Link
 
@@ -19,12 +19,12 @@ class Transmission:
     async def add_channel_to_portal(self, channel: disnake.TextChannel, portal_id: int):
         self.portals[portal_id].links.append(await Link.new(channel))
         self.channels[channel.id] = portal_id
-        await services.database.portal.add_channel(portal_id, channel.id)
+        await add_channel(portal_id, channel.id)
 
     async def add_portal(self, primary_channel: disnake.TextChannel) -> int:
         portal_id = utilities.random.generate_random_int()
         self.portals[portal_id] = await Chain.new([primary_channel])
-        await services.database.portal.add_portal(portal_id, primary_channel.id)
+        await add_portal(portal_id, primary_channel.id)
         return portal_id
 
     async def handle_message(self, message: disnake.Message):
