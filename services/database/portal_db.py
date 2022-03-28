@@ -1,3 +1,4 @@
+import collections
 from typing import Dict, List
 import disnake
 
@@ -18,8 +19,8 @@ def load_channels(bot) -> Dict[int, int]:
 async def load_portals(bot) -> Dict[int, Chain]:
     portals = driver_service.session.query(Portal)
     channels = driver_service.session.query(Channel)
-    portals_dict = {}
-    channels_dict: Dict[int, List[disnake.TextChannel]] = {}
+    portals_dict = collections.defaultdict(Chain)
+    channels_dict: Dict[int, list[disnake.TextChannel]] = collections.defaultdict(list[disnake.TextChannel])
     for channel in channels:
         if not channels_dict.get(int(channel.portal_id)):
             channels_dict[int(channel.portal_id)] = []

@@ -34,11 +34,12 @@ class Link:
             return
 
         # Handle if this message is replying to another message
+        reply_notif = None
         try:
             if not original_message_id is None:
                 message_to_reply_id = await retrieve_message_to_reply(original_message_id, self.hook.channel.id)
                 message_to_reply = await self.channel.fetch_message(int(message_to_reply_id))
-                await message_to_reply.reply(content=f"{msg.author.name}'s message below is replying to this message.")
+                reply_notif = await message_to_reply.reply(content=f"{msg.author.name}'s message below is replying to this message. [Test](https://google.com/)")
         except:
             print("Couldn't find the message to reply to")
 
@@ -49,3 +50,6 @@ class Link:
                                                                files=files, wait=True)
         await add_message(original_message_id=msg.id, copy_message_id=webhook_message.id,
                           channel_id=webhook_message.channel.id)
+        if reply_notif is not None:
+            embed = disnake.Embed(description=f"[Jump to message]({webhook_message.jump_url})")
+            await reply_notif.edit(embed=embed, content="")

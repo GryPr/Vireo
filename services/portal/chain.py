@@ -1,3 +1,5 @@
+import asyncio
+
 import disnake
 
 from services.database.message_db import retrieve_original_message, add_message
@@ -35,5 +37,5 @@ class Chain:
 
         await add_message(message.id, message.id, message.channel.id)
         if message.channel in (link.channel for link in self.links):
-            for link in self.links:
-                await link.send(message, original_message_id=original_message_id)
+            await asyncio.gather(
+                *[link.send(message, original_message_id=original_message_id) for link in self.links])

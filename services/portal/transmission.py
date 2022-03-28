@@ -41,6 +41,8 @@ class Transmission:
             return True
 
     async def handle_message(self, message: disnake.Message):
+        if self.channels is None:
+            return
         portal_id: int = self.channels.get(message.channel.id)
         if not portal_id:
             return
