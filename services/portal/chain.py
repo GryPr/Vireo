@@ -13,6 +13,7 @@ class Chain:
     """
     A class that wraps a list of Links. Represent a single connected network of channels, which echo back to each other.
     """
+
     @classmethod
     async def new(cls, channels: list[disnake.TextChannel]):
         """
@@ -34,7 +35,7 @@ class Chain:
 
         # If the message is a reply, grab the original message ID
         original_message_id = None
-        if not message.reference is None:
+        if message.reference is not None:
             try:
                 original_message_id = await retrieve_original_message(message.reference.message_id)
             except:

@@ -2,7 +2,9 @@ from typing import Optional
 
 import disnake
 from disnake import WebhookMessage, RawMessageUpdateEvent
+from disnake.utils import MISSING
 
+from components.MessageReplyView import MessageReplyView
 from services.database.message_db import add_message, retrieve_message_to_reply
 from services.portal.webhook import Webhook
 
@@ -27,32 +29,31 @@ class Link:
     async def update(self, message_to_update: disnake.Message, updated_message: RawMessageUpdateEvent):
         await self.hook.edit_message(message_to_update.id, content=updated_message.data["content"])
 
-    async def send(self, msg: disnake.Message, reply_message_id: int = None):
+    async def send(self, message: disnake.Message, reply_message_id: int = None):
         """
         Send a message to the channel.
         If a discord message is passed, the bot will try to imitate the message and author using a webhook.
         A MessageLike can be passed for finer control.
         """
-        if msg.channel == self.channel:
+        if message.channel == self.channel:
             return
 
         # Handle if this message is replying to another message
-        reply_notif = None
+        view = MISSING
         try:
-            if not reply_message_id is None:
+            if reply_message_id is not None:
                 message_to_reply_id = await retrieve_message_to_reply(reply_message_id, self.hook.channel.id)
                 message_to_reply = await self.channel.fetch_message(int(message_to_reply_id))
-                reply_notif = await message_to_reply.reply(content=f"{msg.author.name}'s message below is replying to this message.")
-        except:
-            print("Couldn't find the message to reply to")
+                view = MessageReplyView(message, message_to_reply)
+        except Exception as e:
+            print(f"Couldn't find the message to reply to - {e}")
 
-        files = [await attc.to_file() for attc in msg.attachments]
-        webhook_message: WebhookMessage = await self.hook.send(content=msg.content,
-                                                               avatar_url=str(msg.author.avatar.url),
-                                                               username=msg.author.name, tts=msg.tts,
-                                                               files=files, wait=True)
-        await add_message(original_message_id=msg.id, copy_message_id=webhook_message.id,
+        # Send webhook message
+        files = [await attc.to_file() for attc in message.attachments]
+        webhook_message: WebhookMessage = await self.hook.send(content=message.content,
+                                                               avatar_url=str(message.author.avatar.url),
+                                                               username=f"{message.author.name} from {message.guild.name}", tts=message.tts,
+                                                               files=files, wait=True, view=view)
+        # Add message to database
+        await add_message(original_message_id=message.id, copy_message_id=webhook_message.id,
                           channel_id=webhook_message.channel.id)
-        if reply_notif is not None:
-            embed = disnake.Embed(description=f"[Jump to message]({webhook_message.jump_url})")
-            await reply_notif.edit(embed=embed, content="")
