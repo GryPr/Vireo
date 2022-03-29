@@ -14,7 +14,8 @@ async def add_message(original_message_id: int, copy_message_id: int, channel_id
 
 # Retrieve the copy message that is linked to an original message ID
 async def retrieve_copy_message(original_message_id: int, channel_id: int):
-    result = driver_service.session.query(Message).filter_by(original_message_id=str(original_message_id), channel_id=str(channel_id)).one()
+    result = driver_service.session.query(Message).filter_by(original_message_id=str(original_message_id),
+                                                             channel_id=str(channel_id)).one()
     return result
 
 
@@ -28,3 +29,13 @@ async def retrieve_original_message(copy_message_id: int) -> int:
 async def retrieve_message_to_reply(original_message_id: int, channel_id: int) -> int:
     message_to_reply: Message = await retrieve_copy_message(original_message_id, channel_id)
     return message_to_reply.copy_message_id
+
+
+# Retrieves messages filtered by original message ID
+async def retrieve_copy_messages(original_message_id: int) -> list[Message]:
+    result = []
+    try:
+        result = driver_service.session.query(Message).filter_by(original_message_id=str(original_message_id)).all()
+    except Exception as e:
+        print(e)
+    return result

@@ -5,7 +5,7 @@ import random
 import sys
 
 import disnake
-from disnake import ApplicationCommandInteraction
+from disnake import ApplicationCommandInteraction, RawMessageDeleteEvent, RawMessageUpdateEvent
 from disnake.ext import tasks, commands
 from disnake.ext.commands import Bot
 from disnake.ext.commands import Context
@@ -101,12 +101,16 @@ async def on_message(message: disnake.Message) -> None:
 
 
 @bot.event
-async def on_message_delete(message: disnake.Message) -> None:
-    if message.author == bot.user or message.author.bot:
+async def on_raw_message_delete(payload: RawMessageDeleteEvent) -> None:
+    if not Transmission.transmission_service.channel_in_portal(payload.channel_id):
         return
-    if not Transmission.transmission_service.channel_in_portal(message.channel.id):
-        return
+    await Transmission.transmission_service.handle_delete(payload, bot)
 
+@bot.event
+async def on_raw_message_edit(payload: RawMessageUpdateEvent) -> None:
+    if not Transmission.transmission_service.channel_in_portal(payload.channel_id):
+        return
+    await Transmission.transmission_service.handle_update(payload, bot)
 
 @bot.event
 async def on_slash_command(interaction: ApplicationCommandInteraction) -> None:

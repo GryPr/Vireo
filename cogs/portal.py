@@ -29,12 +29,12 @@ class Portal(commands.Cog, name="portal"):
 
     @portal.sub_command(description="Subscribe the channel to a portal")
     async def sub(self, inter: disnake.ApplicationCommandInteraction, portal_id: int):
-        # try:
-        await transmission_service.add_channel_to_portal(inter.channel, portal_id)
-        # except Exception as e:
-        #     print(e)
-        #     await inter.send(embed=error_embed("Error has occured adding the channel to the portal"))
-        #     return
+        try:
+            await transmission_service.add_channel_to_portal(inter.channel, portal_id)
+        except Exception as e:
+            print(e)
+            await inter.send(embed=error_embed("Error has occured adding the channel to the portal"))
+            return
         embed = disnake.Embed(title="Added channel to the portal", description=f"Portal ID: {portal_id}")
         embed.add_field(
             name="Subscribe other servers using this command",

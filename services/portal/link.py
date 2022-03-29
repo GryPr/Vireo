@@ -1,7 +1,7 @@
 from typing import Optional
 
 import disnake
-from disnake import WebhookMessage
+from disnake import WebhookMessage, RawMessageUpdateEvent
 
 from services.database.message_db import add_message, retrieve_message_to_reply
 from services.portal.webhook import Webhook
@@ -24,7 +24,10 @@ class Link:
         self.hook = await Webhook.connect(channel, "Vireo")
         return self
 
-    async def send(self, msg: disnake.Message, original_message_id: int = None):
+    async def update(self, message_to_update: disnake.Message, updated_message: RawMessageUpdateEvent):
+        await self.hook.edit_message(message_to_update.id, content=updated_message.data["content"])
+
+    async def send(self, msg: disnake.Message, reply_message_id: int = None):
         """
         Send a message to the channel.
         If a discord message is passed, the bot will try to imitate the message and author using a webhook.
@@ -36,10 +39,10 @@ class Link:
         # Handle if this message is replying to another message
         reply_notif = None
         try:
-            if not original_message_id is None:
-                message_to_reply_id = await retrieve_message_to_reply(original_message_id, self.hook.channel.id)
+            if not reply_message_id is None:
+                message_to_reply_id = await retrieve_message_to_reply(reply_message_id, self.hook.channel.id)
                 message_to_reply = await self.channel.fetch_message(int(message_to_reply_id))
-                reply_notif = await message_to_reply.reply(content=f"{msg.author.name}'s message below is replying to this message. [Test](https://google.com/)")
+                reply_notif = await message_to_reply.reply(content=f"{msg.author.name}'s message below is replying to this message.")
         except:
             print("Couldn't find the message to reply to")
 

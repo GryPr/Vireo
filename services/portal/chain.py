@@ -1,4 +1,6 @@
 import asyncio
+import collections
+from typing import Dict
 
 import disnake
 
@@ -7,20 +9,23 @@ from services.portal.link import Link
 
 
 class Chain:
+    links: Dict[int, Link]
     """
     A class that wraps a list of Links. Represent a single connected network of channels, which echo back to each other.
     """
     @classmethod
-    async def new(cls, channels):
+    async def new(cls, channels: list[disnake.TextChannel]):
         """
         Create a new Link object.
         """
         self = cls()
-        self.links = [await Link.new(ch) for ch in channels]
+        self.links = collections.defaultdict(Link)
+        for ch in channels:
+            self.links[ch.id] = await Link.new(ch)
         return self
 
-    async def add(self, channel: disnake.TextChannel):
-        self.links.append(await Link.new(channel))
+    async def add(self, id: int, channel: disnake.TextChannel):
+        self.links[id] = await Link.new(channel)
 
     async def send(self, message: disnake.Message):
         """
@@ -36,6 +41,6 @@ class Chain:
                 print("Couldn't find the message to reply to")
 
         await add_message(message.id, message.id, message.channel.id)
-        if message.channel in (link.channel for link in self.links):
+        if message.channel in (link.channel for link in self.links.values()):
             await asyncio.gather(
-                *[link.send(message, original_message_id=original_message_id) for link in self.links])
+                *[link.send(message, reply_message_id=original_message_id) for link in self.links.values()])
