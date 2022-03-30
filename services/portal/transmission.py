@@ -11,13 +11,13 @@ from models.database.message import Message
 from services.database.message_db import retrieve_copy_messages
 from services.database.portal_db import load_channels, load_portals, add_portal, add_channel, remove_channel
 from services.portal.chain import Chain
-from services.portal.link import Link
 
 
 class Transmission:
     channels: Dict[int, int]  # key=channel_id, value=portal_id
     portals: Dict[int, Chain]
 
+    # Load the channels and portals from the database
     async def initialize(self, bot: Bot):
         self.channels = load_channels(bot)
         self.portals = await load_portals(bot)
@@ -34,7 +34,7 @@ class Transmission:
         await remove_channel(channel_id)
         return portal_id
 
-    async def add_portal(self, primary_channel: disnake.TextChannel) -> int:
+    async def create_portal(self, primary_channel: disnake.TextChannel) -> int:
         portal_id = utilities.random.generate_random_int()
         self.portals[portal_id] = await Chain.new([primary_channel])
         await add_portal(portal_id, primary_channel.id)

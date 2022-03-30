@@ -20,7 +20,7 @@ class Portal(commands.Cog, name="portal"):
 
     @portal.sub_command(description="Create a new portal")
     async def initialize(self, inter: disnake.ApplicationCommandInteraction):
-        portal_id: int = await transmission_service.add_portal(inter.channel)
+        portal_id: int = await transmission_service.create_portal(inter.channel)
         embed = disnake.Embed(title="New portal created", description=f"Portal ID: {portal_id}")
         embed.add_field(
             name="Subscribe other servers using this command",
