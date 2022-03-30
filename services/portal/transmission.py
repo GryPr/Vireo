@@ -9,7 +9,7 @@ from disnake.ext.commands import Bot
 import utilities.random
 from models.database.message import Message
 from services.database.message_db import retrieve_copy_messages
-from services.database.portal_db import load_channels, load_portals, add_portal, add_channel
+from services.database.portal_db import load_channels, load_portals, add_portal, add_channel, remove_channel
 from services.portal.chain import Chain
 from services.portal.link import Link
 
@@ -23,9 +23,16 @@ class Transmission:
         self.portals = await load_portals(bot)
 
     async def add_channel_to_portal(self, channel: disnake.TextChannel, portal_id: int):
-        await self.portals[portal_id].add(channel.id, await Link.new(channel))
+        await self.portals[portal_id].add(channel)
         self.channels[channel.id] = portal_id
         await add_channel(portal_id, channel.id)
+
+    async def remove_channel_from_portal(self, channel_id: int) -> int:
+        portal_id: int = self.channels[channel_id]
+        await self.portals[portal_id].remove(channel_id)
+        del self.channels[channel_id]
+        await remove_channel(channel_id)
+        return portal_id
 
     async def add_portal(self, primary_channel: disnake.TextChannel) -> int:
         portal_id = utilities.random.generate_random_int()
@@ -58,9 +65,13 @@ class Transmission:
 
     async def handle_update(self, updated_message: RawMessageUpdateEvent, bot: Bot):
         original_message = bot.get_message(updated_message.message_id)
-        if updated_message.data["content"] is None:
+        if updated_message.data.get("content") is None:
             return
-        copy_messages_db: List[Message] = await retrieve_copy_messages(original_message.id)
+        try:
+            copy_messages_db: List[Message] = await retrieve_copy_messages(original_message.id)
+        except AttributeError:
+            print("Original message is not in the database")
+            return
         copy_messages: List[disnake.Message] = []
         for copy_message in copy_messages_db:
             message = bot.get_message(copy_message.copy_message_id)

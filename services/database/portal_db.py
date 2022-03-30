@@ -40,3 +40,9 @@ async def add_portal(portal_id: int, channel_id: int):
 async def add_channel(portal_id: int, channel_id: int):
     driver_service.session.add(Channel(portal_id=portal_id, channel_id=channel_id))
     driver_service.session.commit()
+
+
+async def remove_channel(channel_id: int):
+    result = driver_service.session.query(Channel).filter_by(channel_id=channel_id).one()
+    driver_service.session.delete(result)
+    driver_service.session.commit()

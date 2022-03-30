@@ -58,7 +58,7 @@ bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"),
           help_command=None,  # type: ignore
           sync_commands_debug=True,
           sync_permissions=True,
-          test_guilds=[956366437532971068, 927670915423158322])
+          test_guilds=[956366437532971068, 927670915423158322, 751142001147248843, 808501710460289025])
 
 
 @bot.event

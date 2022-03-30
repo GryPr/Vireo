@@ -25,8 +25,11 @@ class Chain:
             self.links[ch.id] = await Link.new(ch)
         return self
 
-    async def add(self, id: int, channel: disnake.TextChannel):
-        self.links[id] = await Link.new(channel)
+    async def add(self, channel: disnake.TextChannel):
+        self.links[channel.id] = await Link.new(channel)
+
+    async def remove(self, id: int):
+        del self.links[id]
 
     async def send(self, message: disnake.Message):
         """

@@ -1,3 +1,5 @@
+import traceback
+
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import Bot
@@ -33,7 +35,8 @@ class Portal(commands.Cog, name="portal"):
             await transmission_service.add_channel_to_portal(inter.channel, portal_id)
         except Exception as e:
             print(e)
-            await inter.send(embed=error_embed("Error has occured adding the channel to the portal"))
+            traceback.print_exc()
+            await inter.send(embed=error_embed("Error has occurred adding the channel to the portal"))
             return
         embed = disnake.Embed(title="Added channel to the portal", description=f"Portal ID: {portal_id}")
         embed.add_field(
@@ -43,20 +46,24 @@ class Portal(commands.Cog, name="portal"):
         )
         await inter.send(embed=embed)
 
-    @portal.sub_command(description="Wipe all portals")
-    async def wipe(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.send(embed=wip_embed())
-
-    @portal.sub_command(description="List all portals")
-    async def list(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.send(embed=wip_embed())
+    @portal.sub_command(description="Unsubscribe from a portal")
+    async def unsub(self, inter: disnake.ApplicationCommandInteraction):
+        try:
+            portal_id = await transmission_service.remove_channel_from_portal(inter.channel_id)
+        except Exception as e:
+            print(e)
+            await inter.send(embed=error_embed("Error has occurred adding the channel to the portal"))
+            return
+        embed = disnake.Embed(title="Removed channel from portal", description=f"Portal ID: {portal_id}")
+        embed.add_field(
+            name="Resubscribe to the portal using this command",
+            value=f"/portal sub {portal_id}",
+            inline=False
+        )
+        await inter.send(embed=embed)
 
     @portal.sub_command(description="Kick a subscriber")
     async def kick(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.send(embed=wip_embed())
-
-    @portal.sub_command(description="Regenerate the portal ID")
-    async def regenerate(self, inter: disnake.ApplicationCommandInteraction):
         await inter.send(embed=wip_embed())
 
 

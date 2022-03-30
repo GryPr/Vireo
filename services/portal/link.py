@@ -1,5 +1,3 @@
-from typing import Optional
-
 import disnake
 from disnake import WebhookMessage, RawMessageUpdateEvent
 from disnake.utils import MISSING
