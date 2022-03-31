@@ -2,3 +2,4 @@ disnake
 sqlalchemy
 mariadb
 sqlalchemy-utils
+PyMySQL

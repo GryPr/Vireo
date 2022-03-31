@@ -23,7 +23,7 @@ def get_connection_string():
     if not port:
         port = "3306"
 
-    return f"mariadb+mariadbconnector://{user}:{password}@{uri}:{port}/{db}"
+    return f"mysql+pymysql://{user}:{password}@{uri}:{port}/{db}"
 
 
 def get_engine():
