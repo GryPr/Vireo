@@ -1,11 +1,11 @@
 from sqlalchemy.exc import PendingRollbackError, OperationalError
-from tenacity import stop_after_attempt, retry
+from tenacity import stop_after_attempt, retry, wait_exponential
 
 from models.database.message import Message
 from services.database.driver import driver_service, commit_session
 
 
-@retry(stop=stop_after_attempt(5))
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=5))
 async def add_message(original_message_id: int, copy_message_id: int, channel_id: int):
     driver_service.session.add(
         Message(original_message_id=str(original_message_id), copy_message_id=copy_message_id, channel_id=channel_id))
@@ -32,7 +32,7 @@ async def retrieve_message_to_reply(original_message_id: int, channel_id: int) -
 
 
 # Retrieves messages filtered by original message ID
-@retry(stop=stop_after_attempt(5))
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=5))
 async def retrieve_copy_messages(original_message_id: int) -> list[Message]:
     try:
         result = driver_service.session.query(Message).filter_by(original_message_id=str(original_message_id)).all()

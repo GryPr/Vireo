@@ -4,6 +4,7 @@ import sqlalchemy
 from sqlalchemy.exc import PendingRollbackError, OperationalError
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy_utils import database_exists, create_database
+from tenacity import stop_after_attempt, wait_exponential, retry
 
 
 def get_connection_string():
@@ -27,6 +28,7 @@ def get_connection_string():
     return f"mysql+pymysql://{user}:{password}@{uri}:{port}/{db}"
 
 
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=5))
 def get_engine():
     engine = sqlalchemy.create_engine(get_connection_string())
 

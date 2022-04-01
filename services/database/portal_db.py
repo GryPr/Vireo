@@ -1,7 +1,7 @@
 import collections
 from typing import Dict
 import disnake
-from tenacity import stop_after_attempt, retry
+from tenacity import stop_after_attempt, retry, wait_exponential
 
 from models.database.channel import Channel
 from models.database.portal import Portal
@@ -38,13 +38,13 @@ async def add_portal(portal_id: int, channel_id: int):
     await add_channel(portal_id, channel_id)
 
 
-@retry(stop=stop_after_attempt(5))
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=5))
 async def add_channel(portal_id: int, channel_id: int):
     driver_service.session.add(Channel(portal_id=portal_id, channel_id=channel_id))
     commit_session()
 
 
-@retry(stop=stop_after_attempt(5))
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=5))
 async def remove_channel(channel_id: int):
     result = driver_service.session.query(Channel).filter_by(channel_id=channel_id).one()
     driver_service.session.delete(result)
