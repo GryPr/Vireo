@@ -8,22 +8,13 @@ from tenacity import stop_after_attempt, wait_exponential, retry
 
 
 def get_connection_string():
-    user = os.getenv("MARIADB_USER")
-    password = os.getenv("MARIADB_PASSWORD")
+    user = os.getenv("MARIADB_USER", default="root")
+    password = os.getenv("MARIADB_PASSWORD", default="root")
 
-    uri = os.getenv("MARIADB_URI")
-    port = os.getenv("MARIADB_PORT")
+    uri = os.getenv("MARIADB_URI", default="127.0.0.1")
+    port = os.getenv("MARIADB_PORT", default="3306")
 
-    db = os.getenv("MARIADB_DB")
-
-    if not db:
-        db = "vireo"
-
-    if not uri:
-        uri = "127.0.0.1"
-
-    if not port:
-        port = "3306"
+    db = os.getenv("MARIADB_DB", default="vireo")
 
     return f"mysql+pymysql://{user}:{password}@{uri}:{port}/{db}"
 
