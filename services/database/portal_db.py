@@ -1,10 +1,11 @@
 import collections
-from typing import Dict, List
+from typing import Dict
 import disnake
+from tenacity import stop_after_attempt, retry
 
 from models.database.channel import Channel
 from models.database.portal import Portal
-from services.database.driver import driver_service
+from services.database.driver import driver_service, commit_session
 from services.portal.chain import Chain
 
 
@@ -33,16 +34,18 @@ async def load_portals(bot) -> Dict[int, Chain]:
 
 async def add_portal(portal_id: int, channel_id: int):
     driver_service.session.add(Portal(portal_id=portal_id, primary_channel_id=channel_id))
-    driver_service.session.commit()
+    commit_session()
     await add_channel(portal_id, channel_id)
 
 
+@retry(stop=stop_after_attempt(5))
 async def add_channel(portal_id: int, channel_id: int):
     driver_service.session.add(Channel(portal_id=portal_id, channel_id=channel_id))
-    driver_service.session.commit()
+    commit_session()
 
 
+@retry(stop=stop_after_attempt(5))
 async def remove_channel(channel_id: int):
     result = driver_service.session.query(Channel).filter_by(channel_id=channel_id).one()
     driver_service.session.delete(result)
-    driver_service.session.commit()
+    commit_session()

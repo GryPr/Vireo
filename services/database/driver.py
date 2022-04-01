@@ -1,7 +1,8 @@
 import os
 
 import sqlalchemy
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import PendingRollbackError, OperationalError
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy_utils import database_exists, create_database
 
 
@@ -39,6 +40,16 @@ def get_session(engine):
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
+
+
+def commit_session():
+    try:
+        driver_service.session.commit()
+    except PendingRollbackError:
+        driver_service.session.rollback()
+        raise Exception
+    except OperationalError:
+        raise Exception
 
 
 class Driver:
