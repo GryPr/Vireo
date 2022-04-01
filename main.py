@@ -17,11 +17,19 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-def load_all_extensions() -> None:
-    for filename in os.listdir(os.path.join(os.path.dirname(__file__), 'cogs')):
-        if filename.endswith('.py'):
-            # splicing cuts 3 last characters aka .py
-            bot.load_extension(f'cogs.{filename[:-3]}')
+def load_all_extensions(folder_name: str, valid_file_extensions: set[str]) -> None:
+    """Loads all the extensions contained within a folder
+    - 
+        :param folder_name: the folder which contains the extensions to be loaded
+        :param valid_file_extension: set of file extensions which we want to load
+    """
+    folder_dir = os.path.join(os.path.dirname(__file__), folder_name)
+    with os.scandir(folder_dir) as dir_iterator:
+        for dir in dir_iterator:
+            if dir.is_file():
+                file_base, file_ext = os.path.splitext(dir.name)
+                if file_ext in valid_file_extensions:
+                    bot.load_extension(f'{folder_name}.{file_base}')
 
 
 """	
@@ -205,5 +213,5 @@ async def on_command_error(context: Context, error) -> None:
 
 
 # Run the bot with the token
-load_all_extensions()
+load_all_extensions('cogs', {'.py'})
 bot.run(os.environ.get("BOT_TOKEN"))
