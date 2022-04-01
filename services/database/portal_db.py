@@ -9,6 +9,7 @@ from services.database.driver import driver_service, commit_session
 from services.portal.chain import Chain
 
 
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=5))
 def load_channels(bot) -> Dict[int, int]:
     channels = driver_service.session.query(Channel)
     channels_dict = {}
@@ -17,6 +18,7 @@ def load_channels(bot) -> Dict[int, int]:
     return channels_dict
 
 
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(min=1, multiplier=1, max=5))
 async def load_portals(bot) -> Dict[int, Chain]:
     portals = driver_service.session.query(Portal)
     channels = driver_service.session.query(Channel)
@@ -32,6 +34,7 @@ async def load_portals(bot) -> Dict[int, Chain]:
     return portals_dict
 
 
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=5))
 async def add_portal(portal_id: int, channel_id: int):
     driver_service.session.add(Portal(portal_id=portal_id, primary_channel_id=channel_id))
     commit_session()
