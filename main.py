@@ -67,8 +67,7 @@ def setup_bot() -> None:
             intents=disnake.Intents.all(),
             help_command=None,  # type: ignore
             sync_commands_debug=True,
-            sync_permissions=True,
-            test_guilds=[956366437532971068, 927670915423158322, 751142001147248843, 808501710460289025])
+            sync_permissions=True)
 
 
 @bot.event
