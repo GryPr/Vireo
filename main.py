@@ -24,7 +24,7 @@ def load_all_extensions(filepath: str, valid_file_extensions: set[str]) -> None:
     :param valid_file_extensions: set of file extensions which indicates which files to load
     """
     for valid_file_extension in valid_file_extensions:
-        # Recursively seeks files with a `valid_file_extension`` starting at `filepath`
+        # Recursively seeks files with a `valid_file_extension` starting at `filepath`
         for path in Path(filepath).glob(f'**/*{valid_file_extension}'):
             if path.is_file():
                 path_base, path_extension = os.path.splitext(path)
