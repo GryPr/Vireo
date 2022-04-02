@@ -61,14 +61,12 @@ intents.presences = True
 def setup_bot() -> None:
     global intents
     intents = disnake.Intents.default()
-
     global bot
     bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"),
             intents=disnake.Intents.all(),
             help_command=None,  # type: ignore
             sync_commands_debug=True,
-            sync_permissions=True,
-            test_guilds=[956366437532971068, 927670915423158322, 751142001147248843, 808501710460289025])
+            sync_permissions=True)
 
 
 @bot.event
