@@ -38,7 +38,6 @@ async def load_portals(bot) -> Dict[int, Chain]:
 async def add_portal(portal_id: int, channel_id: int):
     driver_service.session.add(Portal(portal_id=portal_id, primary_channel_id=channel_id))
     commit_session()
-    await add_channel(portal_id, channel_id)
 
 
 @retry(stop=stop_after_attempt(5), wait=wait_fixed(1))
