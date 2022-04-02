@@ -22,6 +22,8 @@ class Chain:
         self = cls()
         self.links = collections.defaultdict(Link)
         for ch in channels:
+            if not ch:
+                continue
             self.links[ch.id] = await Link.new(ch)
         return self
 
