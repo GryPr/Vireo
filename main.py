@@ -3,6 +3,7 @@ import os
 import platform
 import random
 import sys
+from pathlib import Path
 
 import disnake
 from disnake import ApplicationCommandInteraction, RawMessageDeleteEvent, RawMessageUpdateEvent
@@ -17,19 +18,18 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-def load_all_extensions(folder_name: str, valid_file_extensions: set[str]) -> None:
-    """Loads all the extensions contained within a folder
-    - 
-        :param folder_name: the folder which contains the extensions to be loaded
-        :param valid_file_extension: set of file extensions which we want to load
+def load_all_extensions(filepath: str, valid_file_extensions: set[str]) -> None:
+    """Loads all the extensions contained within the given filepath (and within all the folders contained said folder)
+    :param filepath: relative file path from which to start the recursive search for files containing valid extensions, which'll be loaded
+    :param valid_file_extensions: set of file extensions which indicates which files to load
     """
-    folder_dir = os.path.join(os.path.dirname(__file__), folder_name)
-    with os.scandir(folder_dir) as dir_iterator:
-        for dir in dir_iterator:
-            if dir.is_file():
-                file_base, file_ext = os.path.splitext(dir.name)
-                if file_ext in valid_file_extensions:
-                    bot.load_extension(f'{folder_name}.{file_base}')
+    for valid_file_extension in valid_file_extensions:
+        # Recursively seeks files with a `valid_file_extension`` starting at `filepath`
+        for path in Path(filepath).glob(f'**/*{valid_file_extension}'):
+            if path.is_file():
+                path_base, path_extension = os.path.splitext(path)
+                dot_qualified_path        = path_base.replace('/', '.')
+                bot.load_extension(dot_qualified_path)
 
 
 """	
@@ -58,15 +58,17 @@ intents.members = True
 intents.messages = True
 intents.presences = True
 """
+def setup_bot() -> None:
+    global intents
+    intents = disnake.Intents.default()
 
-intents = disnake.Intents.default()
-
-bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"),
-          intents=disnake.Intents.all(),
-          help_command=None,  # type: ignore
-          sync_commands_debug=True,
-          sync_permissions=True,
-          test_guilds=[956366437532971068, 927670915423158322, 751142001147248843, 808501710460289025])
+    global bot
+    bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"),
+            intents=disnake.Intents.all(),
+            help_command=None,  # type: ignore
+            sync_commands_debug=True,
+            sync_permissions=True,
+            test_guilds=[956366437532971068, 927670915423158322, 751142001147248843, 808501710460289025])
 
 
 @bot.event
@@ -212,6 +214,8 @@ async def on_command_error(context: Context, error) -> None:
     raise error
 
 
-# Run the bot with the token
-load_all_extensions('cogs', {'.py'})
-bot.run(os.environ.get("BOT_TOKEN"))
+if __name__ == "__main__":
+    setup_bot()
+    # Run the bot with the token
+    load_all_extensions('cogs', {'.py'})
+    bot.run(os.environ.get("BOT_TOKEN"))
