@@ -61,7 +61,7 @@ intents.presences = True
 def setup_bot() -> None:
     global intents
     intents = disnake.Intents.default()
-
+    
     global bot
     bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"),
             intents=disnake.Intents.all(),
