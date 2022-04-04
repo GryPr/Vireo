@@ -28,7 +28,7 @@ def load_all_extensions(filepath: str, valid_file_extensions: set[str]) -> None:
         for path in Path(filepath).glob(f'**/*{valid_file_extension}'):
             if path.is_file():
                 path_base, path_extension = os.path.splitext(path)
-                dot_qualified_path        = path_base.replace('/', '.')
+                dot_qualified_path = path_base.replace(os.sep, os.extsep)
                 bot.load_extension(dot_qualified_path)
 
 
@@ -58,16 +58,15 @@ intents.members = True
 intents.messages = True
 intents.presences = True
 """
-def setup_bot() -> None:
-    global intents
-    intents = disnake.Intents.default()
-    
-    global bot
-    bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"),
-            intents=disnake.Intents.all(),
-            help_command=None,  # type: ignore
-            sync_commands_debug=True,
-            sync_permissions=True)
+
+
+intents = disnake.Intents.default()
+
+bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"),
+          intents=disnake.Intents.all(),
+          help_command=None,  # type: ignore
+          sync_commands_debug=True,
+          sync_permissions=True)
 
 
 @bot.event
@@ -115,11 +114,13 @@ async def on_raw_message_delete(payload: RawMessageDeleteEvent) -> None:
         return
     await Transmission.transmission_service.handle_delete(payload, bot)
 
+
 @bot.event
 async def on_raw_message_edit(payload: RawMessageUpdateEvent) -> None:
     if not Transmission.transmission_service.channel_in_portal(payload.channel_id):
         return
     await Transmission.transmission_service.handle_update(payload, bot)
+
 
 @bot.event
 async def on_slash_command(interaction: ApplicationCommandInteraction) -> None:
@@ -214,7 +215,6 @@ async def on_command_error(context: Context, error) -> None:
 
 
 if __name__ == "__main__":
-    setup_bot()
     # Run the bot with the token
     load_all_extensions('cogs', {'.py'})
     bot.run(os.environ.get("BOT_TOKEN"))
