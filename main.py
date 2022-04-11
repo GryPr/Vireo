@@ -3,6 +3,7 @@ import os
 import platform
 import random
 import sys
+from pathlib import Path
 
 import disnake
 from disnake import ApplicationCommandInteraction, RawMessageDeleteEvent, RawMessageUpdateEvent
@@ -17,19 +18,18 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-def load_all_extensions(folder_name: str, valid_file_extensions: set[str]) -> None:
-    """Loads all the extensions contained within a folder
-    - 
-        :param folder_name: the folder which contains the extensions to be loaded
-        :param valid_file_extension: set of file extensions which we want to load
+def load_all_extensions(filepath: str, valid_file_extensions: set[str]) -> None:
+    """Loads all the extensions contained within the given filepath (and within all the folders contained said folder)
+    :param filepath: relative file path from which to start the recursive search for files containing valid extensions, which'll be loaded
+    :param valid_file_extensions: set of file extensions which indicates which files to load
     """
-    folder_dir = os.path.join(os.path.dirname(__file__), folder_name)
-    with os.scandir(folder_dir) as dir_iterator:
-        for dir in dir_iterator:
-            if dir.is_file():
-                file_base, file_ext = os.path.splitext(dir.name)
-                if file_ext in valid_file_extensions:
-                    bot.load_extension(f'{folder_name}.{file_base}')
+    for valid_file_extension in valid_file_extensions:
+        # Recursively seeks files with a `valid_file_extension` starting at `filepath`
+        for path in Path(filepath).glob(f'**/*{valid_file_extension}'):
+            if path.is_file():
+                path_base, path_extension = os.path.splitext(path)
+                dot_qualified_path = path_base.replace(os.sep, os.extsep)
+                bot.load_extension(dot_qualified_path)
 
 
 """	
@@ -61,11 +61,12 @@ intents.presences = True
 
 intents = disnake.Intents.default()
 
-bot = Bot(command_prefix=os.environ.get("PREFIX", default="v!"),
-          intents=disnake.Intents.all(),
-          help_command=None,  # type: ignore
-          sync_commands_debug=True,
-          sync_permissions=True)
+bot = Bot(
+    command_prefix=os.environ.get("PREFIX", default="v!"),
+    intents=disnake.Intents.all(),
+    help_command=None,  # type: ignore
+    sync_commands_debug=True,
+    sync_permissions=True)
 
 
 @bot.event
@@ -109,15 +110,19 @@ async def on_message(message: disnake.Message) -> None:
 
 @bot.event
 async def on_raw_message_delete(payload: RawMessageDeleteEvent) -> None:
-    if not Transmission.transmission_service.channel_in_portal(payload.channel_id):
+    if not Transmission.transmission_service.channel_in_portal(
+            payload.channel_id):
         return
     await Transmission.transmission_service.handle_delete(payload, bot)
 
+
 @bot.event
 async def on_raw_message_edit(payload: RawMessageUpdateEvent) -> None:
-    if not Transmission.transmission_service.channel_in_portal(payload.channel_id):
+    if not Transmission.transmission_service.channel_in_portal(
+            payload.channel_id):
         return
     await Transmission.transmission_service.handle_update(payload, bot)
+
 
 @bot.event
 async def on_slash_command(interaction: ApplicationCommandInteraction) -> None:
@@ -126,11 +131,13 @@ async def on_slash_command(interaction: ApplicationCommandInteraction) -> None:
     :param interaction: The slash command that has been executed.
     """
     print(
-        f"Executed {interaction.data.name} command in {interaction.guild.name} (ID: {interaction.guild.id}) by {interaction.author} (ID: {interaction.author.id})")
+        f"Executed {interaction.data.name} command in {interaction.guild.name} (ID: {interaction.guild.id}) by {interaction.author} (ID: {interaction.author.id})"
+    )
 
 
 @bot.event
-async def on_slash_command_error(interaction: ApplicationCommandInteraction, error: Exception) -> None:
+async def on_slash_command_error(interaction: ApplicationCommandInteraction,
+                                 error: Exception) -> None:
     """
     The code in this event is executed every time a valid slash command catches an error
     :param interaction: The slash command that failed executing.
@@ -146,17 +153,16 @@ async def on_slash_command_error(interaction: ApplicationCommandInteraction, err
         embed = disnake.Embed(
             title="Error!",
             description="You are blacklisted from using the bot.",
-            color=0xE02B2B
-        )
+            color=0xE02B2B)
         print("A blacklisted user tried to execute a command.")
         return await interaction.send(embed=embed, ephemeral=True)
     elif isinstance(error, commands.errors.MissingPermissions):
         embed = disnake.Embed(
             title="Error!",
-            description="You are missing the permission(s) `" + ", ".join(
-                error.missing_permissions) + "` to execute this command!",
-            color=0xE02B2B
-        )
+            description="You are missing the permission(s) `" +
+            ", ".join(error.missing_permissions) +
+            "` to execute this command!",
+            color=0xE02B2B)
         print("A blacklisted user tried to execute a command.")
         return await interaction.send(embed=embed, ephemeral=True)
     raise error
@@ -172,7 +178,8 @@ async def on_command_completion(context: Context) -> None:
     split = full_command_name.split(" ")
     executed_command = str(split[0])
     print(
-        f"Executed {executed_command} command in {context.guild.name} (ID: {context.message.guild.id}) by {context.message.author} (ID: {context.message.author.id})")
+        f"Executed {executed_command} command in {context.guild.name} (ID: {context.message.guild.id}) by {context.message.author} (ID: {context.message.author.id})"
+    )
 
 
 @bot.event
@@ -188,29 +195,29 @@ async def on_command_error(context: Context, error) -> None:
         hours = hours % 24
         embed = disnake.Embed(
             title="Hey, please slow down!",
-            description=f"You can use this command again in {f'{round(hours)} hours' if round(hours) > 0 else ''} {f'{round(minutes)} minutes' if round(minutes) > 0 else ''} {f'{round(seconds)} seconds' if round(seconds) > 0 else ''}.",
-            color=0xE02B2B
-        )
+            description=
+            f"You can use this command again in {f'{round(hours)} hours' if round(hours) > 0 else ''} {f'{round(minutes)} minutes' if round(minutes) > 0 else ''} {f'{round(seconds)} seconds' if round(seconds) > 0 else ''}.",
+            color=0xE02B2B)
         await context.send(embed=embed)
     elif isinstance(error, commands.MissingPermissions):
         embed = disnake.Embed(
             title="Error!",
-            description="You are missing the permission(s) `" + ", ".join(
-                error.missing_permissions) + "` to execute this command!",
-            color=0xE02B2B
-        )
+            description="You are missing the permission(s) `" +
+            ", ".join(error.missing_permissions) +
+            "` to execute this command!",
+            color=0xE02B2B)
         await context.send(embed=embed)
     elif isinstance(error, commands.MissingRequiredArgument):
         embed = disnake.Embed(
             title="Error!",
             description=str(error).capitalize(),
             # We need to capitalize because the command arguments have no capital letter in the code.
-            color=0xE02B2B
-        )
+            color=0xE02B2B)
         await context.send(embed=embed)
     raise error
 
 
-# Run the bot with the token
-load_all_extensions('cogs', {'.py'})
-bot.run(os.environ.get("BOT_TOKEN"))
+if __name__ == "__main__":
+    # Run the bot with the token
+    load_all_extensions('cogs', {'.py'})
+    bot.run(os.environ.get("BOT_TOKEN"))

@@ -22,7 +22,8 @@ class Transmission:
         self.channels = load_channels(bot)
         self.portals = await load_portals(bot)
 
-    async def add_channel_to_portal(self, channel: disnake.TextChannel, portal_id: int):
+    async def add_channel_to_portal(self, channel: disnake.TextChannel,
+                                    portal_id: int):
         await self.portals[portal_id].add(channel)
         self.channels[channel.id] = portal_id
         await add_channel(portal_id, channel.id)
@@ -66,12 +67,14 @@ class Transmission:
         chain: Chain = self.portals[portal_id]
         await chain.send(message)
 
-    async def handle_update(self, updated_message: RawMessageUpdateEvent, bot: Bot):
+    async def handle_update(self, updated_message: RawMessageUpdateEvent,
+                            bot: Bot):
         original_message = bot.get_message(updated_message.message_id)
         if updated_message.data.get("content") is None:
             return
         try:
-            copy_messages_db: List[Message] = await retrieve_copy_messages(original_message.id)
+            copy_messages_db: List[Message] = await retrieve_copy_messages(
+                original_message.id)
         except AttributeError:
             print("Original message is not in the database")
             return
@@ -80,12 +83,15 @@ class Transmission:
             message = bot.get_message(copy_message.copy_message_id)
             if message.author.bot:
                 copy_messages.append(message)
-        await asyncio.gather(
-            *[self.portals[self.channels[copy_message.channel.id]].links[copy_message.channel.id]
-                  .update(copy_message, updated_message) for copy_message in copy_messages])
+        await asyncio.gather(*[
+            self.portals[self.channels[copy_message.channel.id]].links[
+                copy_message.channel.id].update(copy_message, updated_message)
+            for copy_message in copy_messages
+        ])
 
     async def handle_delete(self, payload: RawMessageDeleteEvent, bot: Bot):
-        copy_messages_db: List[Message] = await retrieve_copy_messages(payload.message_id)
+        copy_messages_db: List[Message] = await retrieve_copy_messages(
+            payload.message_id)
         copy_messages: List[disnake.Message] = []
         for copy_message in copy_messages_db:
             message = bot.get_message(copy_message.copy_message_id)
