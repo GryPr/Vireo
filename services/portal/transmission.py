@@ -79,15 +79,10 @@ class Transmission:
         except AttributeError:
             print("Original message is not in the database")
             return
-        copy_messages: List[disnake.Message] = []
-        for copy_message in copy_messages_db:
-            message = bot.get_message(copy_message.copy_message_id)
-            if message.author.bot:
-                copy_messages.append(message)
         await asyncio.gather(*[
-            self.portals[self.channels[copy_message.channel.id]].links[
-                copy_message.channel.id].update(copy_message, updated_message)
-            for copy_message in copy_messages
+            self.portals[self.channels[copy_message.channel_id]].links[
+                copy_message.channel_id].update(copy_message.copy_message_id, updated_message)
+            for copy_message in copy_messages_db
         ])
 
     async def handle_delete(self, payload: RawMessageDeleteEvent, bot: Bot):
@@ -107,7 +102,7 @@ class Transmission:
         try:
             msg.delete()
         except disnake.errors.Forbidden:
-            msg.channel.send(embed=embed.error_embed("Missing Delete Messages permissions"))
+            msg.channel.send(embed=embed.error_embed("Missing manage messages permissions"))
 
 
 transmission_service = Transmission()

@@ -28,10 +28,18 @@ class Link:
             return None
         return self
 
-    async def update(self, message_to_update: disnake.Message,
+    async def update(self, message_to_update_id: int,
                      updated_message: RawMessageUpdateEvent):
-        await self.hook.edit_message(message_to_update.id,
-                                     content=updated_message.data["content"])
+        if message_to_update_id == updated_message.message_id:
+            return
+        try:
+            await self.hook.edit_message(message_to_update_id,
+                                         content=updated_message.data["content"])
+        except disnake.errors.NotFound:
+            print("Did not find message to update")
+
+    async def delete(self, message_to_delete: disnake.Message):
+        await self.hook.delete_message(message_to_delete.id)
 
     @retry(stop=stop_after_attempt(2))
     async def send(self,
