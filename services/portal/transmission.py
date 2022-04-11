@@ -11,6 +11,7 @@ from models.database.message import Message
 from services.database.message_db import retrieve_copy_messages
 from services.database.portal_db import load_channels, load_portals, add_portal, add_channel, remove_channel
 from services.portal.chain import Chain
+from utilities import embed
 
 
 class Transmission:
@@ -99,7 +100,14 @@ class Transmission:
                 continue
             copy_messages.append(message)
         await asyncio.gather(
-            *[copy_message.delete() for copy_message in copy_messages])
+            *[self.delete_message(copy_message) for copy_message in copy_messages])
+
+    @staticmethod
+    def delete_message(msg: disnake.Message):
+        try:
+            msg.delete()
+        except disnake.errors.Forbidden:
+            msg.channel.send(embed=embed.error_embed("Missing Delete Messages permissions"))
 
 
 transmission_service = Transmission()
