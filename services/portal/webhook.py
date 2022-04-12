@@ -1,6 +1,5 @@
-
-
 class Webhook:
+
     @staticmethod
     async def connect(channel, name):
         """

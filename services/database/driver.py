@@ -19,7 +19,8 @@ def get_connection_string():
     return f"mysql+pymysql://{user}:{password}@{uri}:{port}/{db}"
 
 
-@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=5))
+@retry(stop=stop_after_attempt(5),
+       wait=wait_exponential(multiplier=1, min=1, max=5))
 def get_engine():
     engine = sqlalchemy.create_engine(get_connection_string())
 
@@ -46,6 +47,7 @@ def commit_session():
 
 
 class Driver:
+
     def __init__(self):
         self.engine = get_engine()
         self.session = get_session(self.engine)
