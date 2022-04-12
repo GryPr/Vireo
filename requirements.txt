@@ -1,6 +1,6 @@
-disnake==2.4.0
-SQLAlchemy==1.4.35
-mariadb==1.0.10
-SQLAlchemy-Utils==0.38.2
-PyMySQL==1.0.2
-tenacity==8.0.1
+disnake~=2.4
+SQLAlchemy~=1.4
+mariadb~=1.0
+SQLAlchemy-Utils~=0.38
+PyMySQL~=1.0
+tenacity~=8.0
