@@ -42,11 +42,14 @@ class Chain:
         original_message_id = None
         if message.reference is not None:
             try:
-                original_message_id = await retrieve_original_message(message.reference.message_id)
+                original_message_id = await retrieve_original_message(
+                    message.reference.message_id)
             except:
                 print("Couldn't find the message to reply to")
 
         await add_message(message.id, message.id, message.channel.id)
         if message.channel in (link.channel for link in self.links.values()):
-            await asyncio.gather(
-                *[link.send(message, reply_message_id=original_message_id) for link in self.links.values()])
+            await asyncio.gather(*[
+                link.send(message, reply_message_id=original_message_id)
+                for link in self.links.values()
+            ])
