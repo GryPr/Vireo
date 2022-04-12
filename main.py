@@ -19,9 +19,9 @@ if sys.platform == "win32":
 
 
 def load_all_extensions(filepath: str, valid_file_extensions: set[str]) -> None:
-    """Loads all the extensions contained within the given filepath (and within all the folders contained said folder)
-    :param filepath: relative file path from which to start the recursive search for files containing valid extensions, which'll be loaded
-    :param valid_file_extensions: set of file extensions which indicates which files to load
+    """Load all extensions within a directory and all its subdirectories
+    :param filepath: Relative filepath from which to start the recursive search for extensions
+    :param valid_file_extensions: Set of file extensions (e.g: {.py}) which are to be loaded
     """
     for valid_file_extension in valid_file_extensions:
         # Recursively seeks files with a `valid_file_extension` starting at `filepath`
@@ -32,7 +32,7 @@ def load_all_extensions(filepath: str, valid_file_extensions: set[str]) -> None:
                 bot.load_extension(dot_qualified_path)
 
 
-"""	
+"""
 Setup bot intents (events restrictions)
 For more information about intents, please go to the following websites:
 https://docs.disnake.dev/en/latest/intents.html
@@ -72,7 +72,7 @@ bot = Bot(
 @bot.event
 async def on_ready() -> None:
     """
-    The code in this even is executed when the bot is ready
+    Called when the bot is ready
     """
     print(f"Logged in as {bot.user.name}")
     print(f"disnake API version: {disnake.__version__}")
@@ -99,8 +99,8 @@ bot.remove_command("help")
 @bot.event
 async def on_message(message: disnake.Message) -> None:
     """
-    The code in this event is executed every time someone sends a message, with or without the prefix
-    :param message: The message that was sent.
+    Called when someone sends a message, with or without the bot prefix
+    :param message: The message that was sent
     """
     if message.author == bot.user or message.author.bot:
         return
@@ -110,6 +110,10 @@ async def on_message(message: disnake.Message) -> None:
 
 @bot.event
 async def on_raw_message_delete(payload: RawMessageDeleteEvent) -> None:
+    """
+    Called when a message is deleted
+    :param payload: The raw event payload data
+    """
     if not Transmission.transmission_service.channel_in_portal(
             payload.channel_id):
         return
@@ -118,6 +122,10 @@ async def on_raw_message_delete(payload: RawMessageDeleteEvent) -> None:
 
 @bot.event
 async def on_raw_message_edit(payload: RawMessageUpdateEvent) -> None:
+    """
+    Called when a message is edited
+    :param payload: the raw event payload data
+    """
     if not Transmission.transmission_service.channel_in_portal(
             payload.channel_id):
         return
@@ -127,21 +135,21 @@ async def on_raw_message_edit(payload: RawMessageUpdateEvent) -> None:
 @bot.event
 async def on_slash_command(interaction: ApplicationCommandInteraction) -> None:
     """
-    The code in this event is executed every time a slash command has been *successfully* executed
-    :param interaction: The slash command that has been executed.
+    Called when a slash command has been successfully executed
+    :param interaction: The slash command that has been executed
     """
-    print(
-        f"Executed {interaction.data.name} command in {interaction.guild.name} (ID: {interaction.guild.id}) by {interaction.author} (ID: {interaction.author.id})"
-    )
+    print(f"Executed {interaction.data.name} command "
+          f"in {interaction.guild.name} (ID: {interaction.guild.id}) "
+          f"by {interaction.author} (ID: {interaction.author.id})")
 
 
 @bot.event
 async def on_slash_command_error(interaction: ApplicationCommandInteraction,
                                  error: Exception) -> None:
     """
-    The code in this event is executed every time a valid slash command catches an error
-    :param interaction: The slash command that failed executing.
-    :param error: The error that has been faced.
+    Called when a valid slash command catches an error
+    :param interaction: The slash command that failed executing
+    :param error: The error that has been faced
     """
     if isinstance(error, exceptions.UserBlacklisted):
         """
@@ -170,23 +178,23 @@ async def on_slash_command_error(interaction: ApplicationCommandInteraction,
 @bot.event
 async def on_command_completion(context: Context) -> None:
     """
-    The code in this event is executed every time a normal command has been *successfully* executed
-    :param context: The context of the command that has been executed.
+    Called when a normal command has been successfully executed
+    :param context: The context of the command that has been executed
     """
     full_command_name = context.command.qualified_name
     split = full_command_name.split(" ")
     executed_command = str(split[0])
-    print(
-        f"Executed {executed_command} command in {context.guild.name} (ID: {context.message.guild.id}) by {context.message.author} (ID: {context.message.author.id})"
-    )
+    print(f"Executed {executed_command} command "
+          f"in {context.guild.name} (ID: {context.message.guild.id}) "
+          f"by {context.message.author} (ID: {context.message.author.id})")
 
 
 @bot.event
 async def on_command_error(context: Context, error) -> None:
     """
     The code in this event is executed every time a normal valid command catches an error
-    :param context: The normal command that failed executing.
-    :param error: The error that has been faced.
+    :param context: The normal command that failed executing
+    :param error: The error that has been faced
     """
     if isinstance(error, commands.CommandOnCooldown):
         minutes, seconds = divmod(error.retry_after, 60)
@@ -194,8 +202,12 @@ async def on_command_error(context: Context, error) -> None:
         hours = hours % 24
         embed = disnake.Embed(
             title="Hey, please slow down!",
-            description=
-            f"You can use this command again in {f'{round(hours)} hours' if round(hours) > 0 else ''} {f'{round(minutes)} minutes' if round(minutes) > 0 else ''} {f'{round(seconds)} seconds' if round(seconds) > 0 else ''}.",
+            description=(
+                f"You can use this command again in "
+                f"{f'{round(hours)} hours' if round(hours) > 0 else ''} "
+                f"{f'{round(minutes)} minutes' if round(minutes) > 0 else ''} "
+                f"{f'{round(seconds)} seconds' if round(seconds) > 0 else ''}."
+            ),
             color=0xE02B2B)
         await context.send(embed=embed)
     elif isinstance(error, commands.MissingPermissions):
