@@ -13,6 +13,7 @@ from disnake.ext.commands import Context
 
 import exceptions
 import services.portal.transmission as Transmission
+from utilities.startup import check_mandatory_env_vars
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -227,7 +228,11 @@ async def on_command_error(context: Context, error) -> None:
     raise error
 
 
-if __name__ == "__main__":
-    # Run the bot with the token
+def main() -> None:
+    check_mandatory_env_vars()
     load_all_extensions('cogs', {'.py'})
     bot.run(os.environ.get("BOT_TOKEN"))
+
+
+if __name__ == "__main__":
+    main()
