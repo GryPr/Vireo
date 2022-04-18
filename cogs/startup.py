@@ -19,7 +19,8 @@ class Startup(commands.Cog):
 
     @tasks.loop(minutes=1.0)
     async def display_statuses(self, *, statuses: Sequence[str]) -> None:
-        """Randomly set the game status of the bot.
+        """
+        Randomly set the game status of the bot.
 
         :param statuses: the statuses to randomly choose from
         """

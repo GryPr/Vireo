@@ -34,7 +34,8 @@ def check_mandatory_env_vars() -> None:
 
 
 def load_extensions(bot: Bot, file_path: str) -> None:
-    """Load bot extension files.
+    """
+    Load bot extension files.
 
     :param bot: the bot which will load the extensions
     :param file_path: directory from which to load extensions, package sub-directories will also be loaded
