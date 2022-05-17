@@ -3,22 +3,19 @@ import collections
 from typing import Dict
 
 import disnake
-
-from services.database.message_db import retrieve_original_message, add_message
+from services.database.message_db import add_message, retrieve_original_message
 from services.portal.link import Link
 
 
 class Chain:
     links: Dict[int, Link]
-    """
-    A class that wraps a list of Links. Represent a single connected network of channels, which echo back to each other.
+    """A class that wraps a list of Links.
+    Represent a single connected network of channels, which echo back to each other.
     """
 
     @classmethod
     async def new(cls, channels: list[disnake.TextChannel]):
-        """
-        Create a new Link object.
-        """
+        """Create a new Link object."""
         self = cls()
         self.links = collections.defaultdict(Link)
         for ch in channels:
@@ -34,9 +31,7 @@ class Chain:
         del self.links[id]
 
     async def send(self, message: disnake.Message):
-        """
-        If the message is sent to a link/channel in the chain, it will be sent to all the links in the chain.
-        """
+        """If the message is sent to a link/channel in the chain, it will be sent to all the links in the chain."""
 
         # If the message is a reply, grab the original message ID
         original_message_id = None
