@@ -8,10 +8,10 @@ from services.portal.link import Link
 
 
 class Chain:
-    links: Dict[int, Link]
     """A class that wraps a list of Links.
     Represent a single connected network of channels, which echo back to each other.
     """
+    links: Dict[int, Link]
 
     @classmethod
     async def new(cls, channels: list[disnake.TextChannel]):
@@ -19,9 +19,8 @@ class Chain:
         self = cls()
         self.links = collections.defaultdict(Link)
         for ch in channels:
-            if not ch:
-                continue
-            self.links[ch.id] = await Link.new(ch)
+            if ch:
+                self.links[ch.id] = await Link.new(ch)
         return self
 
     async def add(self, channel: disnake.TextChannel):
