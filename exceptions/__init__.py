@@ -1,7 +1,5 @@
 class UserBlacklisted(Exception):
-    """
-    Thrown when a user is attempting something, but is blacklisted.
-    """
+    """Thrown when a user is attempting something, but is blacklisted."""
 
     def __init__(self, message="User is blacklisted!"):
         self.message = message
@@ -9,9 +7,7 @@ class UserBlacklisted(Exception):
 
 
 class UserNotOwner(Exception):
-    """
-    Thrown when a user is attempting something, but is not an owner of the bot.
-    """
+    """Thrown when a user is attempting something, but is not an owner of the bot."""
 
     def __init__(self, message="User is not an owner of the bot!"):
         self.message = message
@@ -19,9 +15,7 @@ class UserNotOwner(Exception):
 
 
 class EnvironmentVariablesMissingError(Exception):
-    """
-    Thrown when at least one environment variable is missing.
-    """
+    """Thrown when at least one environment variable is missing."""
 
     def __init__(
         self,
