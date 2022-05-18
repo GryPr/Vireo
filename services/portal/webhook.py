@@ -4,10 +4,11 @@ import disnake
 class Webhook:
 
     @staticmethod
-    async def connect(channel: disnake.TextChannel, name: str):
+    async def connect(channel: disnake.TextChannel,
+                      name: str) -> disnake.Webhook:
         """
-        Returns a webhook object for the given channel and name.
-        If the webhook does not exist, it will be created.
+        Return a webhook object for the given channel and name.
+        If the webhook does not exist, create it.
         """
         hooks = await channel.webhooks()
         for hook in hooks:
