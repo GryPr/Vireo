@@ -4,7 +4,7 @@ from disnake import RawMessageUpdateEvent, WebhookMessage
 from disnake.utils import MISSING
 from services.database.message_db import add_message, retrieve_message_to_reply
 from services.portal.webhook import Webhook
-from utilities.filter import filter_words
+from utilities.filter import censor_message
 
 
 class Link:
@@ -51,7 +51,7 @@ class Link:
         # Send webhook message
         files = [await attc.to_file() for attc in message.attachments]
         webhook_message: WebhookMessage = await self.hook.send(
-            content=filter_words(message.content),
+            content=censor_message(message.content),
             avatar_url=str(message.author.avatar.url),
             username=f"{message.author.name} from {message.guild.name}",
             tts=message.tts,
