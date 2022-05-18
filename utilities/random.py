@@ -1,11 +1,6 @@
 import random
-import string
 
 
-def generate_random_string() -> str:
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for _ in range(15))
-
-
-def generate_random_int() -> int:
-    return random.randrange(999999999)
+def generate_random_int(*, limit: int) -> int:
+    """Generate and return a random int up to (and NOT including) a specified limit."""
+    return random.randrange(limit)

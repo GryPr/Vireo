@@ -36,7 +36,7 @@ class Transmission:
 
     async def create_portal(self, primary_channel: disnake.TextChannel) -> int:
         # Creates the portal
-        portal_id = utilities.random.generate_random_int()
+        portal_id = utilities.random.generate_random_int(limit=1_000_000_000)
         self.portals[portal_id] = await Chain.new([])
         await add_portal(portal_id, primary_channel.id)
         # Adds the current channel to the portal
