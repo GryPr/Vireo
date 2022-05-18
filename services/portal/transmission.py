@@ -1,15 +1,14 @@
 import asyncio
-
-import disnake
 from typing import Dict, List
 
+import disnake
+import utilities.random
 from disnake import RawMessageDeleteEvent, RawMessageUpdateEvent
 from disnake.ext.commands import Bot
-
-import utilities.random
 from models.database.message import Message
 from services.database.message_db import retrieve_copy_messages
-from services.database.portal_db import load_channels, load_portals, add_portal, add_channel, remove_channel
+from services.database.portal_db import (add_channel, add_portal, load_channels,
+                                         load_portals, remove_channel)
 from services.portal.chain import Chain
 
 
@@ -44,27 +43,18 @@ class Transmission:
         await self.add_channel_to_portal(primary_channel, portal_id)
         return portal_id
 
-    def portal_id_exists(self, portal_id: int) -> bool:
-        if not self.portals[portal_id]:
-            return False
-        else:
-            return True
-
     def channel_in_portal(self, channel_id: int) -> bool:
         if self.channels is None:
             return False
-        if not self.channels.get(channel_id):
-            return False
-        else:
-            return True
+        return channel_id in self.channels
 
     async def handle_message(self, message: disnake.Message):
         if self.channels is None:
             return
-        portal_id: int = self.channels.get(message.channel.id)
+        portal_id = self.channels.get(message.channel.id)
         if not portal_id:
             return
-        chain: Chain = self.portals[portal_id]
+        chain = self.portals[portal_id]
         await chain.send(message)
 
     async def handle_update(self, updated_message: RawMessageUpdateEvent,
@@ -95,9 +85,8 @@ class Transmission:
         copy_messages: List[disnake.Message] = []
         for copy_message in copy_messages_db:
             message = bot.get_message(copy_message.copy_message_id)
-            if not message:
-                continue
-            copy_messages.append(message)
+            if message:
+                copy_messages.append(message)
         await asyncio.gather(
             *[copy_message.delete() for copy_message in copy_messages])
 
